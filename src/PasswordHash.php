@@ -147,6 +147,29 @@ final class PasswordHash {
 		return apply_filters( 'check_password', $check, $password, $hash, $user_id );
 	}
 
+
+	/**
+	* Generates a base64-encoded Hash-based Message Authentication Code (HMAC) using the specified algorithm.
+	*
+	* This function calculates the HMAC of the provided password using the specified algorithm (default is SHA-512)
+	* and the WordPress SECURE_AUTH_SALT as the secret key. It then encodes the result using base64 encoding.
+	*
+	* @param string $password The password to generate the HMAC for.
+	* @param string $algo Optional. The hashing algorithm to use. Default is 'sha512'.
+	* @return string|null Returns the base64-encoded HMAC string, or null on failure.
+	*/
+	private function hmac_base64(string $password, string $algo = 'sha512') {
+		// Calculate the HMAC using hash_hmac function
+		$hmac = hash_hmac($algo,  $password, SECURE_AUTH_SALT );
+
+		if ($hmac === false) {
+			return null; // Return null on failure
+		}
+
+		// Encode the HMAC using base64 encoding
+		return base64_encode($hmac);
+	}
+
 	/**
 	* Calculates the entropy of a given password.
 	*
