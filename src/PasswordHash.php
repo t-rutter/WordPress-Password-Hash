@@ -146,4 +146,24 @@ final class PasswordHash {
 
 		return apply_filters( 'check_password', $check, $password, $hash, $user_id );
 	}
+
+	/**
+	* Calculates the entropy of a given password.
+	*
+	* This function calculates the entropy of the provided password based on the number of unique characters
+	* and the length of the password. The entropy is computed using the formula: Entropy = log2(N^L),
+	* where N is the number of unique characters and L is the length of the password.
+	*
+	* @param string $password The password for which to calculate the entropy.
+	* @return float The entropy of the password.
+	*/
+	public function calculateEntropy($password) {
+		// Count the number of unique characters in the password
+		$uniqueCharacters = count(array_unique(str_split($password)));
+
+		// Calculate the entropy using the formula: Entropy = log2(N^L)
+		$entropy = log(pow($uniqueCharacters, strlen($password)), 2);
+
+		return $entropy;
+	}
 }
