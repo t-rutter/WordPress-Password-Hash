@@ -147,6 +147,27 @@ final class PasswordHash {
 		return apply_filters( 'check_password', $check, $password, $hash, $user_id );
 	}
 
+	/**
+	 * Pre-hashes the password before hashing it with the chosen algorithm.
+	 *
+	 * This method pre-hashes the password based on certain conditions before using the chosen algorithm to hash it.
+	 * If the algorithm is CRYPT_BLOWFISH, which has a 72-character limit, the password is pre-hashed using HMAC.
+	 * If the calculated entropy of the password is lower than 480, indicating low randomness, it is pre-hashed using HMAC.
+	 * If pre-hashing is not required, the method returns null.
+	 *
+	 * @param string $password The password to pre-hash.
+	 * @return string|null Returns the pre-hashed password.
+	 */
+	private function preHash($password) {
+		// bcrypt 72 char limit
+		if($this->algorithm === CRYPT_BLOWFISH) return $this->hmac_base64($password);
+
+		// Low calculated entropy
+		if($this->calculateEntropy($password) < 480) return $this->hmac_base64($password);
+
+		// Pre-hashing is not required just pepper the password
+		return substr($password . SECURE_AUTH_SALT, 0, 4096);
+	}
 
 	/**
 	* Generates a base64-encoded Hash-based Message Authentication Code (HMAC) using the specified algorithm.
