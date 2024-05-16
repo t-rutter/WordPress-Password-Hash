@@ -92,7 +92,7 @@ final class PasswordHash {
 	 *
 	 */
 	public function getHash(string $password) {
-		return password_hash($password, $this->algorithm, $this->algorithm_options);
+		return password_hash($this->preHash($password), $this->algorithm, $this->algorithm_options);
 	}
 
 	/**
@@ -115,8 +115,16 @@ final class PasswordHash {
 	}
 
 	private function checkPasswordNative($password, $hash, $user_id = '') {
-		$check = password_verify($password, $hash);
-		$rehash = password_needs_rehash($hash, $this->algorithm, $this->algorithm_options);
+		// Check preHashed password first
+		$check = password_verify($this->preHash($password), $hash);
+		if( $check === true ) {
+			$rehash = password_needs_rehash($hash, $this->algorithm, $this->algorithm_options);
+		} else {
+			// Fallback password check for previous non pre-hashed password
+			$check = password_verify($password, $hash);
+			$rehash = true;
+		}
+
 		return $this->processPasswordCheck($check, $password, $hash, $user_id, $rehash);
 	}
 
